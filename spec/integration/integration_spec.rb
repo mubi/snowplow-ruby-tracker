@@ -500,6 +500,7 @@ describe SnowplowTracker::Tracker, 'Querystring construction' do
       'ttm' => '1234'
     }
 
+    pp param_hash
     for pair in expected_fields
       expect(param_hash[pair[0]][0]).to eq(pair[1])
     end

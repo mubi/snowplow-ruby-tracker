@@ -16,7 +16,6 @@
 require 'net/https'
 require 'set'
 require 'logger'
-require 'contracts'
 
 module SnowplowTracker
 
@@ -25,28 +24,11 @@ module SnowplowTracker
 
   class Emitter
 
-    include Contracts
-
-    @@ConfigHash = ({
-      :protocol => Maybe[Or['http', 'https']],
-      :port => Maybe[Num],
-      :method => Maybe[Or['get', 'post']],
-      :buffer_size => Maybe[Num],
-      :on_success => Maybe[Func[Num => Any]],
-      :on_failure => Maybe[Func[Num, Hash => Any]],
-      :thread_count => Maybe[Num]
-    })
-
-    @@StrictConfigHash = And[@@ConfigHash, lambda { |x|
-      x.class == Hash and Set.new(x.keys).subset? Set.new(@@ConfigHash.keys)
-    }]
-
     @@DefaultConfig = {
       :protocol => 'http',
       :method => 'get'
     }
 
-    Contract String, @@StrictConfigHash => lambda { |x| x.is_a? Emitter }
     def initialize(endpoint, config={})
       config = @@DefaultConfig.merge(config)
       @lock = Monitor.new
@@ -69,7 +51,6 @@ module SnowplowTracker
 
     # Build the collector URI from the configuration hash
     #
-    Contract String, String, Maybe[Num], String => String
     def as_collector_uri(endpoint, protocol, port, method)
       port_string = port == nil ? '' : ":#{port.to_s}"
       path = method == 'get' ? '/i' : '/com.snowplowanalytics.snowplow/tp2'
@@ -79,7 +60,6 @@ module SnowplowTracker
 
     # Add an event to the buffer and flush it if maximum size has been reached
     #
-    Contract Hash => nil
     def input(payload)
       payload.each { |k,v| payload[k] = v.to_s}
       @lock.synchronize do
@@ -94,7 +74,6 @@ module SnowplowTracker
 
     # Flush the buffer
     #
-    Contract Bool => nil
     def flush(async=true)
       @lock.synchronize do
         send_requests(@buffer)
@@ -105,7 +84,6 @@ module SnowplowTracker
 
     # Send all events in the buffer to the collector
     #
-    Contract ArrayOf[Hash] => nil
     def send_requests(evts)
       if evts.size < 1
         LOGGER.info("Skipping sending events since buffer is empty")
@@ -171,7 +149,6 @@ module SnowplowTracker
 
     # Send a GET request
     #
-    Contract Hash => lambda { |x| x.is_a? Net::HTTPResponse }
     def http_get(payload)
       destination = URI(@collector_uri + '?' + URI.encode_www_form(payload))
       LOGGER.info("Sending GET request to #{@collector_uri}...")
@@ -191,7 +168,6 @@ module SnowplowTracker
 
     # Send a POST request
     #
-    Contract Hash => lambda { |x| x.is_a? Net::HTTPResponse }
     def http_post(payload)
       LOGGER.info("Sending POST request to #{@collector_uri}...")
       LOGGER.debug("Payload: #{payload}")
@@ -213,7 +189,6 @@ module SnowplowTracker
 
     # Only 2xx and 3xx status codes are considered successes
     #
-    Contract String => Bool
     def is_good_status_code(status_code)
       status_code.to_i >= 200 && status_code.to_i < 400
     end
@@ -227,7 +202,6 @@ module SnowplowTracker
 
   class AsyncEmitter < Emitter
 
-    Contract String, @@StrictConfigHash => lambda { |x| x.is_a? Emitter }
     def initialize(endpoint, config={})
       @queue = Queue.new()
       # @all_processed_condition and @results_unprocessed are used to emulate Python's Queue.task_done()

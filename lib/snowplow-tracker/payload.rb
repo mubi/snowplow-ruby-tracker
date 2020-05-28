@@ -16,17 +16,13 @@
 require 'base64'
 require 'json'
 require 'net/http'
-require 'contracts'
 
 module SnowplowTracker
 
   class Payload
 
-    include Contracts
-
     attr_reader :context
 
-    Contract nil => Payload
     def initialize
       @context = {}
       self
@@ -34,7 +30,6 @@ module SnowplowTracker
 
     # Add a single name-value pair to @context
     #
-    Contract String, Or[String, Bool, Num, nil] => Or[String, Bool, Num, nil]
     def add(name, value)
       if value != "" and not value.nil?
         @context[name] = value
@@ -43,7 +38,6 @@ module SnowplowTracker
     
     # Add each name-value pair in dict to @context
     #
-    Contract Hash => Hash
     def add_dict(dict)
       for f in dict
         self.add(f[0], f[1])
@@ -52,7 +46,6 @@ module SnowplowTracker
 
     # Stringify a JSON and add it to @context
     #
-    Contract Maybe[Hash], Bool, String, String => Maybe[String]
     def add_json(dict, encode_base64, type_when_encoded, type_when_not_encoded)
       
       if dict.nil?

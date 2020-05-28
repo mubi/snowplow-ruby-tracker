@@ -13,20 +13,15 @@
 # Copyright:: Copyright (c) 2013-2014 Snowplow Analytics Ltd
 # License:: Apache License Version 2.0
 
-require 'contracts'
-
 module SnowplowTracker
 
   class Subject
-
-    include Contracts
 
     @@default_platform = 'srv'
     @@supported_platforms = ['pc', 'tv', 'mob', 'cnsl', 'iot']
 
     attr_reader :standard_nv_pairs
 
-    Contract None => Subject
     def initialize
       @standard_nv_pairs = {"p" => @@default_platform}
       self
@@ -34,7 +29,6 @@ module SnowplowTracker
 
     # Specify the platform
     #
-    Contract String => Subject
     def set_platform(value)
       if @@supported_platforms.include?(value)
         @standard_nv_pairs['p'] = value
@@ -47,7 +41,6 @@ module SnowplowTracker
 
     # Set the business-defined user ID for a user
     #
-    Contract String => Subject
     def set_user_id(user_id)
       @standard_nv_pairs['uid'] = user_id
       self
@@ -55,7 +48,6 @@ module SnowplowTracker
 
     # Set fingerprint for the user
     #
-    Contract Num => Subject
     def set_fingerprint(fingerprint)
       @standard_nv_pairs['fp'] = fingerprint
       self
@@ -63,7 +55,6 @@ module SnowplowTracker
 
     # Set the screen resolution for a device
     #
-    Contract Num, Num => Subject
     def set_screen_resolution(width, height)
       @standard_nv_pairs['res'] = "#{width}x#{height}"
       self
@@ -71,7 +62,6 @@ module SnowplowTracker
 
     # Set the dimensions of the current viewport
     #
-    Contract Num, Num => Subject
     def set_viewport(width, height)
       @standard_nv_pairs['vp'] = "#{width}x#{height}"
       self
@@ -79,7 +69,6 @@ module SnowplowTracker
 
     # Set the color depth of the device in bits per pixel
     #
-    Contract Num => Subject
     def set_color_depth(depth)
       @standard_nv_pairs['cd'] = depth
       self
@@ -87,7 +76,6 @@ module SnowplowTracker
 
     # Set the timezone field
     #
-    Contract String => Subject
     def set_timezone(timezone)
       @standard_nv_pairs['tz'] = timezone
       self
@@ -95,7 +83,6 @@ module SnowplowTracker
 
     # Set the language field
     #
-    Contract String => Subject
     def set_lang(lang)
       @standard_nv_pairs['lang'] = lang
       self
@@ -103,7 +90,6 @@ module SnowplowTracker
 
     # Set the domain user ID
     #
-    Contract String => Subject
     def set_domain_user_id(duid)
       @standard_nv_pairs['duid'] = duid
       self
@@ -111,7 +97,6 @@ module SnowplowTracker
 
     # Set the IP address field
     #
-    Contract String => Subject
     def set_ip_address(ip)
       @standard_nv_pairs['ip'] = ip
       self
@@ -119,7 +104,6 @@ module SnowplowTracker
 
     # Set the user agent
     #
-    Contract String => Subject
     def set_useragent(ua)
       @standard_nv_pairs['ua'] = ua
       self
@@ -128,7 +112,6 @@ module SnowplowTracker
     # Set the network user ID field
     #  This overwrites the nuid field set by the collector
     #
-    Contract String => Subject
     def set_network_user_id(nuid)
       @standard_nv_pairs['tnuid'] = nuid
       self
